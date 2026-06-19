@@ -1,9 +1,24 @@
 {
-  "id": "openclaw-cc-bridge",
-  "name": "Claude Code Bridge",
-  "description": "Control Claude Code from chat platforms via OpenClaw",
-  "version": "0.1.0",
+  "id": "openclaw-cc-direct",
+  "name": "Claude Code Direct",
+  "description": "Control Claude Code from chat platforms via OpenClaw — direct CLI execution, zero network overhead",
+  "version": "0.2.1",
   "skills": ["skills/cc-bridge"],
+  "contracts": {
+    "tools": ["cc_send", "cc_plan", "cc_execute", "cc_workspace", "cc_reset", "cc_status"]
+  },
+  "commandAliases": [
+    { "name": "cc", "kind": "runtime-slash" },
+    { "name": "cc_plan", "kind": "runtime-slash" },
+    { "name": "cc_execute", "kind": "runtime-slash" },
+    { "name": "cc_workspace", "kind": "runtime-slash" },
+    { "name": "cc_reset", "kind": "runtime-slash" },
+    { "name": "cc_status", "kind": "runtime-slash" }
+  ],
+  "activation": {
+    "onStartup": true,
+    "onCommands": ["cc", "cc_plan", "cc_execute", "cc_workspace", "cc_reset", "cc_status"]
+  },
   "configSchema": {
     "type": "object",
     "properties": {

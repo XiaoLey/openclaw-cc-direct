@@ -470,7 +470,7 @@ export default function register(api: PluginApi) {
     acceptsArgs: true,
     requireAuth: true,
     handler: async (ctx) => {
-      const { model, rest: argsAfterModel } = parseModelArg(ctx.args.trim());
+      const { model, rest: argsAfterModel } = parseModelArg((ctx.args || "").trim());
       const { workspace, rest: argsAfterWorkspace } = parseWorkspaceArg(
         argsAfterModel,
         sessions.getActiveWorkspace(ctx.senderId)
@@ -519,7 +519,7 @@ export default function register(api: PluginApi) {
     acceptsArgs: true,
     requireAuth: true,
     handler: async (ctx) => {
-      const { model, rest: argsAfterModel } = parseModelArg(ctx.args.trim());
+      const { model, rest: argsAfterModel } = parseModelArg((ctx.args || "").trim());
       const { workspace, rest: argsAfterWorkspace } = parseWorkspaceArg(
         argsAfterModel,
         sessions.getActiveWorkspace(ctx.senderId)
@@ -567,7 +567,7 @@ export default function register(api: PluginApi) {
     requireAuth: true,
     handler: async (ctx) => {
       const { workspace, rest: additionalNotes } = parseWorkspaceArg(
-        ctx.args.trim(),
+        (ctx.args || "").trim(),
         sessions.getActiveWorkspace(ctx.senderId)
       );
 
@@ -591,7 +591,7 @@ export default function register(api: PluginApi) {
     acceptsArgs: true,
     requireAuth: true,
     handler: async (ctx) => {
-      const rawPath = ctx.args.trim();
+      const rawPath = (ctx.args || "").trim();
       return { text: doWorkspace(ctx.senderId, rawPath || undefined) };
     },
   });
@@ -602,7 +602,7 @@ export default function register(api: PluginApi) {
     acceptsArgs: true,
     requireAuth: true,
     handler: async (ctx) => {
-      const args = ctx.args.trim();
+      const args = (ctx.args || "").trim();
 
       if (args === "--all") {
         return { text: doReset(ctx.senderId, undefined, true) };
@@ -634,7 +634,7 @@ export default function register(api: PluginApi) {
     acceptsArgs: true,
     requireAuth: true,
     handler: async (ctx) => {
-      const { workspace: filterWs } = parseWorkspaceArg(ctx.args.trim(), "");
+      const { workspace: filterWs } = parseWorkspaceArg((ctx.args || "").trim(), "");
       return { text: doStatus(ctx.senderId, filterWs || undefined) };
     },
   });
