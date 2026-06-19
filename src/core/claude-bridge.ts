@@ -263,7 +263,7 @@ export class ClaudeBridge {
         rl.close();
 
         if (stderr) {
-          console.error(`[openclaw-cc-bridge] stderr (code=${code}): ${stderr.slice(0, 1000)}`);
+          console.error(`[openclaw-cc-direct] stderr (code=${code}): ${stderr.slice(0, 1000)}`);
         }
 
         if (!resultEvent) {

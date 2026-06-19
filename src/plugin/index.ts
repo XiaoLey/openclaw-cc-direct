@@ -57,7 +57,7 @@ interface CommandContext {
 
 const DATA_DIR =
   process.env.OPENCLAW_CC_DATA_DIR ||
-  join(process.env.HOME || "~", ".openclaw", "openclaw-cc-bridge");
+  join(process.env.HOME || "~", ".openclaw", "openclaw-cc-direct");
 
 const AGENT_SENDER_ID = "agent";
 
@@ -128,12 +128,12 @@ export default function register(api: PluginApi) {
   const defaultModel =
     (pluginConfig.model as string | undefined) ?? undefined;
 
-  api.logger.info(`[openclaw-cc-bridge] env: ${env ? Object.keys(env).join(", ") : "(none)"}`);
+  api.logger.info(`[openclaw-cc-direct] env: ${env ? Object.keys(env).join(", ") : "(none)"}`);
   if (env?.ANTHROPIC_BASE_URL) {
-    api.logger.info(`[openclaw-cc-bridge] ANTHROPIC_BASE_URL: ${env.ANTHROPIC_BASE_URL}`);
+    api.logger.info(`[openclaw-cc-direct] ANTHROPIC_BASE_URL: ${env.ANTHROPIC_BASE_URL}`);
   }
   if (defaultModel) {
-    api.logger.info(`[openclaw-cc-bridge] default model: ${defaultModel}`);
+    api.logger.info(`[openclaw-cc-direct] default model: ${defaultModel}`);
   }
 
   const bridge = new ClaudeBridge({
@@ -143,7 +143,7 @@ export default function register(api: PluginApi) {
     maxTimeoutRetries: 2,
     onTimeoutRetry: (attempt, maxRetries, sessionId) => {
       api.logger.info(
-        `[openclaw-cc-bridge] Timeout recovery: retry ${attempt}/${maxRetries} (session: ${sessionId})`
+        `[openclaw-cc-direct] Timeout recovery: retry ${attempt}/${maxRetries} (session: ${sessionId})`
       );
     },
   });
@@ -161,7 +161,7 @@ export default function register(api: PluginApi) {
     const hookConfigPath = join(workspace, ".claude", "settings.local.json");
     hookInbox.writeHookConfig(hookConfigPath);
     configuredWorkspaces.add(workspace);
-    api.logger.debug(`[openclaw-cc-bridge] Hook config ensured at ${hookConfigPath}`);
+    api.logger.debug(`[openclaw-cc-direct] Hook config ensured at ${hookConfigPath}`);
   }
 
   /** Log run completion stats. */
@@ -170,7 +170,7 @@ export default function register(api: PluginApi) {
     const cost = r.cost_usd != null ? `$${r.cost_usd.toFixed(4)}` : "?";
     const duration = r.duration_ms != null ? `${(r.duration_ms / 1000).toFixed(1)}s` : "?";
     api.logger.info(
-      `[openclaw-cc-bridge] ${label}[${workspace}] completed: session=${r.session_id} turns=${r.num_turns ?? "?"} cost=${cost} duration=${duration}`
+      `[openclaw-cc-direct] ${label}[${workspace}] completed: session=${r.session_id} turns=${r.num_turns ?? "?"} cost=${cost} duration=${duration}`
     );
   }
 
@@ -210,7 +210,7 @@ export default function register(api: PluginApi) {
     }
 
     api.logger.info(
-      `[openclaw-cc-bridge] [${workspace}] "${prompt.slice(0, 50)}..." from ${senderId}` +
+      `[openclaw-cc-direct] [${workspace}] "${prompt.slice(0, 50)}..." from ${senderId}` +
       (sessionId ? ` (resuming ${sessionId})` : " (new session)")
     );
 
@@ -230,7 +230,7 @@ export default function register(api: PluginApi) {
 
     if (run.response.pendingQuestion) {
       sessions.setPendingQuestion(senderId, workspace, run.response.pendingQuestion);
-      api.logger.info(`[openclaw-cc-bridge] [${workspace}] Claude asked a question, awaiting reply`);
+      api.logger.info(`[openclaw-cc-direct] [${workspace}] Claude asked a question, awaiting reply`);
     }
 
     return run.composedMarkdown;
@@ -255,7 +255,7 @@ export default function register(api: PluginApi) {
     const sessionId = forceNew ? undefined : existingSessionId;
 
     api.logger.info(
-      `[openclaw-cc-bridge] [plan] [${workspace}] "${prompt.slice(0, 50)}..." from ${senderId}` +
+      `[openclaw-cc-direct] [plan] [${workspace}] "${prompt.slice(0, 50)}..." from ${senderId}` +
       (sessionId ? ` (resuming ${sessionId})` : " (new session)")
     );
 
@@ -301,7 +301,7 @@ export default function register(api: PluginApi) {
       : "Proceed with the plan.";
 
     api.logger.info(
-      `[openclaw-cc-bridge] [execute] [${workspace}] resuming session ${existingSession} from ${senderId}`
+      `[openclaw-cc-direct] [execute] [${workspace}] resuming session ${existingSession} from ${senderId}`
     );
 
     sessions.setPendingPlan(senderId, workspace, false);
@@ -373,7 +373,7 @@ export default function register(api: PluginApi) {
     if (all) {
       const count = sessions.removeAllSessions(senderId);
       if (count > 0) {
-        api.logger.info(`[openclaw-cc-bridge] Reset all ${count} session(s) for ${senderId}`);
+        api.logger.info(`[openclaw-cc-direct] Reset all ${count} session(s) for ${senderId}`);
         return `Reset ${count} workspace session(s). Next message starts fresh.`;
       }
       return "No active sessions to reset.";
@@ -386,7 +386,7 @@ export default function register(api: PluginApi) {
 
     const removed = sessions.removeSession(senderId, targetWs);
     if (removed) {
-      api.logger.info(`[openclaw-cc-bridge] Session reset for ${targetWs} (sender: ${senderId})`);
+      api.logger.info(`[openclaw-cc-direct] Session reset for ${targetWs} (sender: ${senderId})`);
       return `Session reset for workspace: ${targetWs}\nNext message starts a new conversation.`;
     }
     return `No active session for workspace: ${targetWs}`;
@@ -451,12 +451,12 @@ export default function register(api: PluginApi) {
     id: "claude-hook-inbox",
     start: async () => {
       hookInbox.start();
-      api.logger.info("[openclaw-cc-bridge] Hook inbox watcher started");
+      api.logger.info("[openclaw-cc-direct] Hook inbox watcher started");
     },
     stop: async () => {
       eventStore.flush();
       hookInbox.stop();
-      api.logger.info("[openclaw-cc-bridge] Hook inbox watcher stopped");
+      api.logger.info("[openclaw-cc-direct] Hook inbox watcher stopped");
     },
   });
 
@@ -506,7 +506,7 @@ export default function register(api: PluginApi) {
         return { text: await doSend(ctx.senderId, workspace, prompt, model, forceNew) };
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] Error: ${msg}`);
         return { text: `Error from Claude Code: ${msg}` };
       }
     },
@@ -554,7 +554,7 @@ export default function register(api: PluginApi) {
         return { text: await doPlan(ctx.senderId, workspace, prompt, model, forceNew) };
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] [plan] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] [plan] Error: ${msg}`);
         return { text: `Error from Claude Code (plan): ${msg}` };
       }
     },
@@ -579,7 +579,7 @@ export default function register(api: PluginApi) {
         return { text: await doExecute(ctx.senderId, workspace, additionalNotes || undefined) };
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] [execute] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] [execute] Error: ${msg}`);
         return { text: `Error executing plan: ${msg}` };
       }
     },
@@ -669,7 +669,7 @@ export default function register(api: PluginApi) {
         : sessions.getActiveWorkspace(AGENT_SENDER_ID);
 
       api.logger.info(
-        `[openclaw-cc-bridge] [tool:cc_send] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
+        `[openclaw-cc-direct] [tool:cc_send] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
         ` continue_session=${!!continueSession} model=${model ?? "default"}`
       );
 
@@ -681,7 +681,7 @@ export default function register(api: PluginApi) {
         return textResult(await doSend(AGENT_SENDER_ID, workspace, message, model, forceNew));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] [tool:cc_send] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] [tool:cc_send] Error: ${msg}`);
         return textResult(`Error from Claude Code: ${msg}`);
       }
     },
@@ -711,7 +711,7 @@ export default function register(api: PluginApi) {
         : sessions.getActiveWorkspace(AGENT_SENDER_ID);
 
       api.logger.info(
-        `[openclaw-cc-bridge] [tool:cc_plan] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
+        `[openclaw-cc-direct] [tool:cc_plan] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
         ` continue_session=${!!continueSession} model=${model ?? "default"}`
       );
 
@@ -723,7 +723,7 @@ export default function register(api: PluginApi) {
         return textResult(await doPlan(AGENT_SENDER_ID, workspace, message, model, forceNew));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] [tool:cc_plan] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] [tool:cc_plan] Error: ${msg}`);
         return textResult(`Error from Claude Code (plan): ${msg}`);
       }
     },
@@ -755,7 +755,7 @@ export default function register(api: PluginApi) {
         return textResult(await doExecute(AGENT_SENDER_ID, workspace, notes, model));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        api.logger.error(`[openclaw-cc-bridge] [tool:cc_execute] Error: ${msg}`);
+        api.logger.error(`[openclaw-cc-direct] [tool:cc_execute] Error: ${msg}`);
         return textResult(`Error executing plan: ${msg}`);
       }
     },
@@ -808,5 +808,5 @@ export default function register(api: PluginApi) {
     },
   });
 
-  api.logger.info("[openclaw-cc-bridge] Plugin registered");
+  api.logger.info("[openclaw-cc-direct] Plugin registered");
 }

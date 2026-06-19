@@ -5,7 +5,7 @@ export function getDebugPageHtml(wsPort: number): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>openclaw-cc-bridge debug</title>
+<title>openclaw-cc-direct debug</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }

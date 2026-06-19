@@ -12,7 +12,7 @@ import { reconstructComposedMarkdown } from "../core/compose-result";
 const DEBUG_PORT = parseInt(process.env.DEBUG_PORT || "3456", 10);
 const DATA_DIR =
   process.env.OPENCLAW_CC_DATA_DIR ||
-  join(process.env.HOME || "~", ".openclaw", "openclaw-cc-bridge");
+  join(process.env.HOME || "~", ".openclaw", "openclaw-cc-direct");
 
 async function main() {
   const sessions = new SessionManager(DATA_DIR);
