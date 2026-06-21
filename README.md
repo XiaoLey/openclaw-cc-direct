@@ -1,5 +1,7 @@
 # openclaw-cc-direct
 
+> **Fork Notice**: This project is a fork of [openclaw-cc-bridge](https://github.com/cadl/openclaw-cc-bridge) by [@cadl](https://github.com/cadl). Original project renamed and enhanced with session key unification, multi-instance safety, and other improvements.
+
 OpenClaw plugin for controlling [Claude Code](https://docs.anthropic.com/en/docs/claude-code) via chat platforms.
 
 openclaw-cc-direct bridges OpenClaw chat commands with Claude Code CLI, enabling users to send prompts, manage sessions, plan and execute code changes, and track tool usage directly from any OpenClaw-connected chat platform.
