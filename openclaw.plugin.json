@@ -2,7 +2,7 @@
   "id": "openclaw-cc-direct",
   "name": "Claude Code Direct",
   "description": "Control Claude Code from chat platforms via OpenClaw — direct CLI execution, zero network overhead",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "skills": ["skills/cc-direct"],
   "contracts": {
     "tools": ["cc_send", "cc_plan", "cc_execute", "cc_workspace", "cc_reset", "cc_status"]

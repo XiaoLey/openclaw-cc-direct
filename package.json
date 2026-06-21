@@ -1,6 +1,6 @@
 {
   "name": "openclaw-cc-direct",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "OpenClaw plugin for controlling Claude Code via chat platforms",
   "main": "dist/plugin/index.js",
   "types": "dist/plugin/index.d.ts",
