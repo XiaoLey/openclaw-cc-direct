@@ -49,6 +49,7 @@ export class SessionManager {
 
   /** Get the active workspace for a sender. */
   getActiveWorkspace(senderId: string): string | undefined {
+    this.load();
     return this.senderStates.get(senderId)?.activeWorkspace;
   }
 
@@ -63,6 +64,7 @@ export class SessionManager {
 
   /** Get session for a specific workspace. */
   getSession(senderId: string, workspace: string): WorkspaceSession | undefined {
+    this.load();
     return this.senderStates.get(senderId)?.workspaceSessions[workspace];
   }
 
@@ -118,6 +120,7 @@ export class SessionManager {
 
   /** List all workspace sessions for a sender, sorted by lastActive descending. */
   listSessions(senderId: string): WorkspaceSession[] {
+    this.load();
     const state = this.senderStates.get(senderId);
     if (!state) return [];
     return Object.values(state.workspaceSessions).sort(
@@ -176,6 +179,7 @@ export class SessionManager {
 
   /** List all active sessions across all senders. */
   list(): Array<{ senderId: string } & WorkspaceSession> {
+    this.load();
     const result: Array<{ senderId: string } & WorkspaceSession> = [];
     for (const [senderId, state] of this.senderStates.entries()) {
       for (const session of Object.values(state.workspaceSessions)) {
