@@ -1,8 +1,8 @@
-# openclaw-cc-bridge
+# openclaw-cc-direct
 
 OpenClaw plugin for controlling [Claude Code](https://docs.anthropic.com/en/docs/claude-code) via chat platforms.
 
-openclaw-cc-bridge bridges OpenClaw chat commands with Claude Code CLI, enabling users to send prompts, manage sessions, plan and execute code changes, and track tool usage directly from any OpenClaw-connected chat platform.
+openclaw-cc-direct bridges OpenClaw chat commands with Claude Code CLI, enabling users to send prompts, manage sessions, plan and execute code changes, and track tool usage directly from any OpenClaw-connected chat platform.
 
 ## Features
 
@@ -69,7 +69,7 @@ Special cases:
 
 ## Skills
 
-The plugin ships an OpenClaw skill (`cc-bridge`) that lets the AI agent automatically recognize coding requests and invoke Claude Code without the user needing to type explicit slash commands. The skill is gated on `claude` CLI being available on PATH.
+The plugin ships an OpenClaw skill (`cc-direct`) that lets the AI agent automatically recognize coding requests and invoke Claude Code without the user needing to type explicit slash commands. The skill is gated on `claude` CLI being available on PATH.
 
 When the skill is loaded, users can simply describe what they want in natural language (e.g., "fix the auth bug in login.ts") and the AI agent will route the request to Claude Code via the appropriate tool.
 
@@ -84,13 +84,13 @@ When the skill is loaded, users can simply describe what they want in natural la
 ### Install
 
 ```bash
-openclaw plugin add openclaw-cc-bridge
+openclaw plugin add openclaw-cc-direct
 ```
 
 Or install manually via npm:
 
 ```bash
-npm install openclaw-cc-bridge
+npm install openclaw-cc-direct
 ```
 
 ### Configuration
@@ -124,7 +124,7 @@ Example config:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENCLAW_CC_DATA_DIR` | `~/.openclaw/openclaw-cc-bridge` | Directory for session and event data |
+| `OPENCLAW_CC_DATA_DIR` | `~/.openclaw/openclaw-cc-direct` | Directory for session and event data |
 | `DEBUG_PORT` | `3456` | Port for the debug UI server |
 
 ## Recommended Configuration
@@ -141,7 +141,7 @@ This ensures:
 Chat Platform
     │
     ▼
- OpenClaw ──► openclaw-cc-bridge plugin
+ OpenClaw ──► openclaw-cc-direct plugin
                  │
                  ├── RunManager ──► orchestrates each execution
                  │     ├── ClaudeBridge ──► claude CLI (child process, NDJSON streaming)
@@ -168,7 +168,7 @@ Chat Platform
 ### Data Layout
 
 ```
-~/.openclaw/openclaw-cc-bridge/
+~/.openclaw/openclaw-cc-direct/
 ├── sessions.json                 # sender → multi-workspace session mappings
 ├── hook-inbox/
 │   └── events.jsonl              # shared hook event inbox (watched by HookInbox)

@@ -1,5 +1,5 @@
 {
-  "name": "openclaw-cc-bridge",
+  "name": "openclaw-cc-direct",
   "version": "0.2.0",
   "description": "OpenClaw plugin for controlling Claude Code via chat platforms",
   "main": "dist/plugin/index.js",

@@ -14,6 +14,13 @@ interface ToolResult {
   content: Array<{ type: string; text: string }>;
 }
 
+type ToolFactoryResult = {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+  execute: (toolCallId: string, params: Record<string, unknown>) => Promise<ToolResult>;
+};
+
 interface PluginApi {
   registerCommand(opts: {
     name: string;
@@ -24,12 +31,7 @@ interface PluginApi {
   }): void;
 
   registerTool(
-    opts: {
-      name: string;
-      description: string;
-      parameters: Record<string, unknown>;
-      execute: (id: string, params: Record<string, unknown>) => Promise<ToolResult>;
-    },
+    toolOrFactory: ToolFactoryResult | ((ctx: Record<string, unknown>) => ToolFactoryResult),
     options?: { optional?: boolean },
   ): void;
 
@@ -645,7 +647,7 @@ export default function register(api: PluginApi) {
 
   const modelEnumDescription = `Model to use. Options: ${VALID_MODELS.join(", ")}. If omitted, uses the configured default or Claude CLI default.`;
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_send",
     description: "Send a message to Claude Code for processing. Each call starts a fresh session by default. Set continue_session=true to resume the previous session. Use this to write, edit, fix, refactor code, run commands, or ask questions about a codebase. Present the full result to the user exactly as returned — do not summarize or rephrase.",
     parameters: {
@@ -658,7 +660,8 @@ export default function register(api: PluginApi) {
       },
       required: ["message"],
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const message = params.message as string;
       const model = params.model as string | undefined;
       const continueSession = params.continue_session as boolean | undefined;
@@ -666,7 +669,7 @@ export default function register(api: PluginApi) {
       const forceNew = !continueSession;
       const workspace = (params.workspace as string | undefined)
         ? resolve(params.workspace as string)
-        : sessions.getActiveWorkspace(AGENT_SENDER_ID);
+        : sessions.getActiveWorkspace(senderId);
 
       api.logger.info(
         `[openclaw-cc-direct] [tool:cc_send] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
@@ -678,16 +681,16 @@ export default function register(api: PluginApi) {
       }
 
       try {
-        return textResult(await doSend(AGENT_SENDER_ID, workspace, message, model, forceNew));
+        return textResult(await doSend(senderId, workspace, message, model, forceNew));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
         api.logger.error(`[openclaw-cc-direct] [tool:cc_send] Error: ${msg}`);
         return textResult(`Error from Claude Code: ${msg}`);
       }
     },
-  });
+  }));
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_plan",
     description: "Ask Claude Code to analyze the codebase and create an implementation plan without making any changes (read-only). Each call starts a fresh session by default. Set continue_session=true to resume the previous session in this conversation. Use for complex or high-risk changes where you want to review before executing. Present the full result to the user exactly as returned — do not summarize or rephrase.",
     parameters: {
@@ -700,7 +703,8 @@ export default function register(api: PluginApi) {
       },
       required: ["message"],
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const message = params.message as string;
       const model = params.model as string | undefined;
       const continueSession = params.continue_session as boolean | undefined;
@@ -708,7 +712,7 @@ export default function register(api: PluginApi) {
       const forceNew = !continueSession;
       const workspace = (params.workspace as string | undefined)
         ? resolve(params.workspace as string)
-        : sessions.getActiveWorkspace(AGENT_SENDER_ID);
+        : sessions.getActiveWorkspace(senderId);
 
       api.logger.info(
         `[openclaw-cc-direct] [tool:cc_plan] "${message.slice(0, 50)}..." workspace=${workspace ?? "(none)"}` +
@@ -720,16 +724,16 @@ export default function register(api: PluginApi) {
       }
 
       try {
-        return textResult(await doPlan(AGENT_SENDER_ID, workspace, message, model, forceNew));
+        return textResult(await doPlan(senderId, workspace, message, model, forceNew));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
         api.logger.error(`[openclaw-cc-direct] [tool:cc_plan] Error: ${msg}`);
         return textResult(`Error from Claude Code (plan): ${msg}`);
       }
     },
-  });
+  }));
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_execute",
     description: "Execute a previously created plan. Must call cc_plan first to create a plan before using this tool. Present the full result to the user exactly as returned — do not summarize or rephrase.",
     parameters: {
@@ -740,28 +744,29 @@ export default function register(api: PluginApi) {
         model: { type: "string", enum: VALID_MODELS, description: modelEnumDescription },
       },
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const notes = params.notes as string | undefined;
       const model = params.model as string | undefined;
       const workspace = (params.workspace as string | undefined)
         ? resolve(params.workspace as string)
-        : sessions.getActiveWorkspace(AGENT_SENDER_ID);
+        : sessions.getActiveWorkspace(senderId);
 
       if (!workspace) {
         return textResult("No active workspace. Use cc_workspace tool to set one first.");
       }
 
       try {
-        return textResult(await doExecute(AGENT_SENDER_ID, workspace, notes, model));
+        return textResult(await doExecute(senderId, workspace, notes, model));
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error";
         api.logger.error(`[openclaw-cc-direct] [tool:cc_execute] Error: ${msg}`);
         return textResult(`Error executing plan: ${msg}`);
       }
     },
-  });
+  }));
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_workspace",
     description: "Set or list the active workspace directory for Claude Code sessions. Call without arguments to list all workspaces.",
     parameters: {
@@ -770,13 +775,14 @@ export default function register(api: PluginApi) {
         path: { type: "string", description: "Directory path to set as active workspace. Omit to list current workspaces." },
       },
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const path = params.path as string | undefined;
-      return textResult(doWorkspace(AGENT_SENDER_ID, path));
+      return textResult(doWorkspace(senderId, path));
     },
-  });
+  }));
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_reset",
     description: "Reset Claude Code session(s). Clears conversation history so the next message starts a fresh session.",
     parameters: {
@@ -786,14 +792,15 @@ export default function register(api: PluginApi) {
         all: { type: "boolean", description: "If true, reset all workspace sessions." },
       },
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const workspace = params.workspace as string | undefined;
       const all = params.all as boolean | undefined;
-      return textResult(doReset(AGENT_SENDER_ID, workspace, all));
+      return textResult(doReset(senderId, workspace, all));
     },
-  });
+  }));
 
-  api.registerTool({
+  api.registerTool((ctx) => ({
     name: "cc_status",
     description: "Show Claude Code session status including active workspace, session IDs, message counts, and pending plans.",
     parameters: {
@@ -802,11 +809,12 @@ export default function register(api: PluginApi) {
         workspace: { type: "string", description: "Show status for a specific workspace. If omitted, shows all sessions." },
       },
     },
-    async execute(_id, params) {
+    async execute(_toolCallId, params) {
+      const senderId = (ctx.requesterSenderId as string) || AGENT_SENDER_ID;
       const workspace = params.workspace as string | undefined;
-      return textResult(doStatus(AGENT_SENDER_ID, workspace));
+      return textResult(doStatus(senderId, workspace));
     },
-  });
+  }));
 
   api.logger.info("[openclaw-cc-direct] Plugin registered");
 }

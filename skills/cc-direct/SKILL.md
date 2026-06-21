@@ -1,5 +1,5 @@
 ---
-name: cc-bridge
+name: cc-direct
 description: Use Claude Code to write, edit, fix, and refactor code in any project workspace. Supports direct execution, plan-then-execute workflow, and session management.
 metadata: {"openclaw": {"requires": {"bins": ["claude"]}}}
 ---

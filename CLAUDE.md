@@ -1,11 +1,11 @@
-# openclaw-cc-bridge
+# openclaw-cc-direct
 
 OpenClaw plugin that bridges chat platforms with Claude Code CLI, enabling chat-driven Claude Code execution with session persistence, plan/execute workflow, and real-time event tracking.
 
 ## Architecture
 
 ```
-OpenClaw Chat Platform → OpenClaw API → openclaw-cc-bridge Plugin
+OpenClaw Chat Platform → OpenClaw API → openclaw-cc-direct Plugin
   ├── RunManager      → orchestrates bridge, hooks, and event store per execution
   ├── ClaudeBridge    → spawns `claude` CLI as child process (NDJSON streaming)
   ├── SessionManager  → multi-workspace per-sender session persistence
@@ -18,7 +18,7 @@ OpenClaw Chat Platform → OpenClaw API → openclaw-cc-bridge Plugin
 
 ```
 skills/
-└── cc-bridge/             — OpenClaw skill (AI agent auto-discovery)
+└── cc-direct/             — OpenClaw skill (AI agent auto-discovery)
     └── SKILL.md           — Skill definition with gating (requires claude CLI)
 src/
 ├── plugin/
@@ -75,15 +75,15 @@ Example config:
 
 ## Environment Variables
 
-- `OPENCLAW_CC_DATA_DIR` — Data persistence directory (default: `~/.openclaw/openclaw-cc-bridge`)
+- `OPENCLAW_CC_DATA_DIR` — Data persistence directory (default: `~/.openclaw/openclaw-cc-direct`)
 - `DEBUG_PORT` — Debug UI port (default: `3456`)
 
 ## Conventions
 
 - All source in `src/`, compiled output in `dist/`
-- Data persisted as JSON/JSONL files under `~/.openclaw/openclaw-cc-bridge/`
+- Data persisted as JSON/JSONL files under `~/.openclaw/openclaw-cc-direct/`
 - Claude Code spawned with `--output-format stream-json --verbose` for NDJSON parsing
-- Hook inbox: All Claude Code hooks append to a single `events.jsonl` file in `~/.openclaw/openclaw-cc-bridge/hook-inbox/`, watched by `HookInbox` via fs.watch + polling fallback. Event type is determined from the `hook_event_name` field in each payload. Config written to `.claude/settings.local.json` per workspace.
+- Hook inbox: All Claude Code hooks append to a single `events.jsonl` file in `~/.openclaw/openclaw-cc-direct/hook-inbox/`, watched by `HookInbox` via fs.watch + polling fallback. Event type is determined from the `hook_event_name` field in each payload. Config written to `.claude/settings.local.json` per workspace.
 - Multi-workspace session model: each sender has an active workspace with independent session state (sessionId, pendingPlan, pendingQuestion)
 - Session defaults are asymmetric: slash commands default to **resume**, agent tools default to **fresh**. Slash commands support `--new`/`-n` to force fresh; agent tools support `continue_session: true` to resume.
 - RunManager coordinates ClaudeBridge + HookInbox + EventStore per execution, with 100ms post-delay for trailing hook events
