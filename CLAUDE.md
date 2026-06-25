@@ -11,7 +11,6 @@ OpenClaw Chat Platform → OpenClaw API → openclaw-cc-direct Plugin
   ├── SessionManager  → multi-workspace per-sender session persistence
   ├── EventStore      → session stream/hook event logging (store/)
   ├── HookInbox       → file-based hook capture with fs.watch (hook-inbox/)
-  └── DebugServer     → standalone dev server with WebSocket UI (port 3456)
 ```
 
 ## Project Structure
@@ -30,16 +29,12 @@ src/
 │   ├── event-store.ts     — Event and stream logging to disk
 │   ├── hook-inbox.ts      — File-based hook capture with fs.watch (replaces HTTP hook server)
 │   └── compose-result.ts  — Markdown result formatting for chat output
-└── debug/
-    ├── debug-server.ts    — HTTP API + WebSocket server (port 3456)
-    └── debug-page.ts      — Inline HTML debug UI
 ```
 
 ## Tech Stack
 
 - TypeScript 5.7 (strict mode), targeting ES2022, CommonJS output
 - Node.js 18+
-- `ws` for WebSocket (debug UI)
 - No test framework or linter configured yet
 
 ## Commands
@@ -47,7 +42,6 @@ src/
 ```bash
 npm run build    # tsc → dist/
 npm run dev      # tsc --watch
-npm run debug    # build + run debug server
 ```
 
 ## Plugin Config
@@ -76,7 +70,6 @@ Example config:
 ## Environment Variables
 
 - `OPENCLAW_CC_DATA_DIR` — Data persistence directory (default: `~/.openclaw/openclaw-cc-direct`)
-- `DEBUG_PORT` — Debug UI port (default: `3456`)
 
 ## Conventions
 

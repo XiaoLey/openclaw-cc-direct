@@ -11,8 +11,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "debug": "tsc && node dist/debug/debug-server.js"
+    "dev": "tsc --watch"
   },
   "openclaw": {
     "extensions": [
@@ -21,10 +20,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/ws": "^8.18.1",
     "typescript": "^5.7.0"
-  },
-  "dependencies": {
-    "ws": "^8.19.0"
   }
 }

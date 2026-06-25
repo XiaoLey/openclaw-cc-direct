@@ -1,6 +1,6 @@
 /**
  * Shared markdown composition for result output.
- * Used by RunManager, debug server (session replay), and OpenClaw plugin.
+ * Used by RunManager (session replay) and OpenClaw plugin.
  */
 
 import type { PendingQuestion } from "./claude-bridge";

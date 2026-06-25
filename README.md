@@ -17,7 +17,6 @@ openclaw-cc-direct bridges OpenClaw chat commands with Claude Code CLI, enabling
 - **File-based hook tracking** — Claude Code hook events (tool use, subagent lifecycle) captured via file-based inbox
 - **Event persistence** — Full audit trail of stream events and hook events stored to disk
 - **Timeout retry** — Automatic retry with `--resume` on Claude Code timeout (configurable max retries)
-- **Debug UI** — Built-in web interface with WebSocket live streaming for development
 
 ## Commands
 
@@ -127,7 +126,6 @@ Example config:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OPENCLAW_CC_DATA_DIR` | `~/.openclaw/openclaw-cc-direct` | Directory for session and event data |
-| `DEBUG_PORT` | `3456` | Port for the debug UI server |
 
 ## Recommended Configuration
 
@@ -164,8 +162,6 @@ Chat Platform
 | `core/event-store.ts` | Persists stream and hook events with session indexing |
 | `core/hook-inbox.ts` | File-based hook event capture via fs.watch + polling fallback |
 | `core/compose-result.ts` | Markdown result composition (thinking, tools, plans, questions) |
-| `debug/debug-server.ts` | Standalone debug server with HTTP API + WebSocket |
-| `debug/debug-page.ts` | Inline HTML for the debug single-page application |
 
 ### Data Layout
 
@@ -188,12 +184,7 @@ Chat Platform
 ```bash
 # Watch mode
 npm run dev
-
-# Launch debug server (compile + start)
-npm run debug
 ```
-
-The debug server starts at `http://localhost:3456` and provides a web UI for sending prompts, viewing live events, inspecting session history, and testing plan/execute workflows.
 
 ## License
 

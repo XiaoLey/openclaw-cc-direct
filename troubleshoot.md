@@ -15,7 +15,7 @@ When running from Terminal, processes are exempt because Terminal.app is a syste
 | Launch method | LAN relay URL | Internet URL | Result |
 |---|---|---|---|
 | Terminal (foreground) | works | works | Terminal is exempt |
-| `npm run debug` (from Terminal) | works | works | Inherits Terminal's exemption |
+| Run gateway in foreground (from Terminal) | works | works | Inherits Terminal's exemption |
 | launchd agent (background) | **FailedToOpenSocket** | works | LAN blocked by Local Network Privacy |
 
 **Fixes (pick one):**

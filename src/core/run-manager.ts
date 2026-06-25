@@ -9,7 +9,7 @@ import {
   SubagentActivity,
 } from "./compose-result";
 
-/** Callbacks for callers that need real-time event notifications (e.g. debug server WebSocket broadcast). */
+/** Callbacks for callers that need real-time event notifications. */
 export interface RunHandle {
   onHookEvent?: (type: string, data: unknown) => void;
   onStreamEvent?: (type: string, data: unknown) => void;
